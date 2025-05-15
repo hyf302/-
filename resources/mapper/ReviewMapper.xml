@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scenic.mapper.ReviewMapper">
+    
+    <insert id="insert" parameterType="com.scenic.entity.Review" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO review (
+            user_id, reservation_id, scenic_spot_id, rating, 
+            content, images, status, create_time, update_time
+        ) VALUES (
+            #{userId}, #{reservationId}, #{scenicSpotId}, #{rating},
+            #{content}, #{images}, #{status}, #{createTime}, #{updateTime}
+        )
+    </insert>
+    
+    <select id="selectById" resultType="com.scenic.entity.Review">
+        SELECT * FROM review WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUserId" resultType="com.scenic.entity.Review">
+        SELECT * FROM review 
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="selectByScenicSpotId" resultType="com.scenic.entity.Review">
+        SELECT * FROM review 
+        WHERE scenic_spot_id = #{scenicSpotId}
+        AND status = 1
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="selectByReservationId" resultType="com.scenic.entity.Review">
+        SELECT * FROM review 
+        WHERE reservation_id = #{reservationId}
+        LIMIT 1
+    </select>
+    
+    <delete id="deleteById">
+        DELETE FROM review WHERE id = #{id}
+    </delete>
+    
+</mapper> 
+ 

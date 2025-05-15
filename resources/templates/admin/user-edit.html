@@ -1,0 +1,10 @@
+<!-- 会员等级选择框 -->
+<div class="form-group">
+    <label for="memberLevel">会员等级</label>
+    <select class="form-control" id="memberLevel" name="memberLevel">
+        <option value="0" th:selected="${user.memberLevel == 0}">普通会员</option>
+        <option value="1" th:selected="${user.memberLevel == 1}">银卡会员</option>
+        <option value="2" th:selected="${user.memberLevel == 2}">金卡会员</option>
+        <option value="3" th:selected="${user.memberLevel == 3}">钻石会员</option>
+    </select>
+</div> 

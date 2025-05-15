@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/scenic_spot_reservation?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: production_user
+    password: production_password
+
+logging:
+  level:
+    com.scenic: info
+    org.springframework: warn
+  file:
+    name: /var/log/scenic-spot/application.log 

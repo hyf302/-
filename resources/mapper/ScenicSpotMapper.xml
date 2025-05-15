@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scenic.mapper.ScenicSpotMapper">
+    <sql id="Base_Column_List">
+        id, name, description, address, open_time, close_time, max_capacity,
+        price, image_urls, status, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="ScenicSpot" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO scenic_spot (
+            name, description, address, open_time, close_time, max_capacity,
+            price, image_urls, status, create_time, update_time
+        ) VALUES (
+            #{name}, #{description}, #{address}, #{openTime}, #{closeTime}, #{maxCapacity},
+            #{price}, #{imageUrls}, #{status}, NOW(), NOW()
+        )
+    </insert>
+
+    <select id="selectById" resultType="ScenicSpot">
+        SELECT <include refid="Base_Column_List" />
+        FROM scenic_spot WHERE id = #{id}
+    </select>
+
+    <select id="selectList" resultType="com.scenic.entity.ScenicSpot">
+        SELECT DISTINCT 
+            id, name, description, address, open_time, close_time,
+            max_capacity, price, image_urls, status, create_time, update_time
+        FROM scenic_spot 
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="update" parameterType="ScenicSpot">
+        UPDATE scenic_spot
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="openTime != null">open_time = #{openTime},</if>
+            <if test="closeTime != null">close_time = #{closeTime},</if>
+            <if test="maxCapacity != null">max_capacity = #{maxCapacity},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="imageUrls != null">image_urls = #{imageUrls},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM scenic_spot WHERE id = #{id}
+    </delete>
+</mapper> 

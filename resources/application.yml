@@ -1,0 +1,132 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: scenic-spot-reservation
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 10
+      min-idle: 10
+      max-active: 30
+      max-wait: 30000
+      time-between-eviction-runs-millis: 30000
+      min-evictable-idle-time-millis: 180000
+      validation-query: SELECT 1
+      validation-query-timeout: 30000
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall,slf4j
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+      data-locations: classpath:db/data.sql
+      continue-on-error: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML
+    servlet:
+      content-type: text/html
+  security:
+    filter:
+      order: 10
+    headers:
+      content-type: true
+      xss: true
+      cache: true
+      frame: true
+  main:
+    allow-circular-references: true
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+        - file:${upload.path}
+  mvc:
+    static-path-pattern: /**
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=300s,recordStats
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.scenic.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+
+mybatis-plus:
+  configuration:
+    cache-enabled: true
+    local-cache-scope: statement
+    default-statement-timeout: 30
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.scenic.entity
+  mapper-locations: classpath:mapper/*.xml
+  mapper-refresh: 1800
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    session:
+      cookie:
+        secure: false
+        http-only: true
+        same-site: lax
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 300
+    min-spare-threads: 20
+    max-connections: 10000
+    accept-count: 200
+    connection-timeout: 30000
+  ssl:
+    enabled: false
+
+jwt:
+  secret: your-secret-key
+  expire: 604800
+  header: Authorization 
+
+logging:
+  file:
+    name: logs/scenic-spot.log
+  level:
+    root: INFO
+    com.scenic: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+upload:
+  path: D:/Documents/Desktop/bishe1/upload-files/
+  allowed-types: image/jpeg,image/png,image/gif
+  max-size: 10485760  # 10MB in bytes 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name} 

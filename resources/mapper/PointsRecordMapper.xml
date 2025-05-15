@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scenic.mapper.PointsRecordMapper">
+    
+    <insert id="insert" parameterType="com.scenic.entity.PointsRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO points_record (
+            user_id, 
+            points, 
+            type, 
+            description, 
+            related_id,
+            create_time
+        ) VALUES (
+            #{userId}, 
+            #{points}, 
+            #{type}, 
+            #{description}, 
+            #{relatedId},
+            #{createTime}
+        )
+    </insert>
+    
+    <select id="selectByUserId" resultType="com.scenic.entity.PointsRecord">
+        SELECT * FROM points_record 
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="getTotalPoints" resultType="int">
+        SELECT COALESCE(SUM(points), 0)
+        FROM points_record 
+        WHERE user_id = #{userId}
+    </select>
+    
+</mapper> 
+ 

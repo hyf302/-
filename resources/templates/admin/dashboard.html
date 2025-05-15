@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 景点预约系统</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background-color: #343a40;
+            padding-top: 1rem;
+            color: white;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+        
+        .top-bar {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.8rem 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .logout-btn {
+            color: #dc3545;
+            background: none;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="px-3 mb-4">
+            <h4><a href="/" style="text-decoration: none; color: inherit;">景点预约系统</a></h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="/admin/dashboard">
+                <i class="fas fa-home me-2"></i>控制台
+            </a>
+            <a class="nav-link" href="/admin/scenic-spots">
+                <i class="fas fa-mountain me-2"></i>景点管理
+            </a>
+            <a class="nav-link" href="/admin/users">
+                <i class="fas fa-users me-2"></i>用户管理
+            </a>
+            <a class="nav-link" href="/admin/reservations">
+                <i class="fas fa-calendar-check me-2"></i>预约管理
+            </a>
+            <a class="nav-link" href="/admin/announcements">
+                <i class="fas fa-bullhorn me-2"></i>公告管理
+            </a>
+        </nav>
+        <form th:action="@{/admin/logout}" method="post" class="mt-auto" style="position: absolute; bottom: 0; width: 100%;">
+            <button type="submit" class="logout-btn">
+                <i class="fas fa-sign-out-alt me-2"></i>退出登录
+            </button>
+        </form>
+    </div>
+
+    <!-- 主要内容区 -->
+    <div class="main-content">
+        <div class="top-bar d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">欢迎回来，<span th:text="${username}">管理员</span></h4>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-clock me-2"></i>
+                <span id="currentTime"></span>
+            </div>
+        </div>
+
+        <!-- 在统计卡片之前添加错误提示 -->
+        <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">
+        </div>
+
+        <!-- 修改统计卡片部分，添加空值检查 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5><i class="fas fa-users me-2 text-primary"></i>总用户数</h5>
+                    <h3 class="mb-0" th:text="${stats?.totalUsers ?: 0}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5><i class="fas fa-calendar-check me-2 text-success"></i>今日预约</h5>
+                    <h3 class="mb-0" th:text="${stats?.todayReservations ?: 0}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5><i class="fas fa-mountain me-2 text-info"></i>景点总数</h5>
+                    <h3 class="mb-0" th:text="${stats?.totalScenicSpots ?: 0}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5><i class="fas fa-chart-line me-2 text-warning"></i>本月收入</h5>
+                    <h3 class="mb-0">¥<span th:text="${#numbers.formatDecimal(stats?.monthlyIncome ?: 0, 1, 2)}">0.00</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- 在月收入卡片中添加说明文字 -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">本月收入</h5>
+                <p class="card-text">¥<span th:text="${monthlyIncome}">0.00</span></p>
+                <small class="text-muted">*仅统计已支付订单</small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 更新当前时间
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html> 

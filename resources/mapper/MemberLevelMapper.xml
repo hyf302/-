@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scenic.mapper.MemberLevelMapper">
+    
+    <select id="getLevelByPoints" resultType="com.scenic.entity.MemberLevel">
+        SELECT * FROM member_level 
+        WHERE min_points &lt;= #{points} 
+        AND max_points >= #{points}
+        AND status = 1
+        ORDER BY min_points DESC
+        LIMIT 1
+    </select>
+    
+    <select id="getNextLevel" resultType="com.scenic.entity.MemberLevel">
+        SELECT * FROM member_level 
+        WHERE min_points > #{points}
+        AND status = 1
+        ORDER BY min_points ASC 
+        LIMIT 1
+    </select>
+    
+    <select id="selectAll" resultType="com.scenic.entity.MemberLevel">
+        SELECT DISTINCT * FROM member_level 
+        WHERE status = 1 
+        ORDER BY min_points ASC
+    </select>
+    
+    <insert id="insertPointsLog">
+        INSERT INTO points_record (user_id, points, type, description, create_time)
+        VALUES (
+            #{userId}, 
+            #{pointsChange}, 
+            '预约支付',
+            #{reason}, 
+            NOW()
+        )
+    </insert>
+    
+</mapper> 
+ 

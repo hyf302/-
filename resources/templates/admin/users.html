@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 景点预约系统</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background-color: #343a40;
+            padding-top: 1rem;
+            color: white;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+        
+        .top-bar {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.8rem 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .logout-btn {
+            color: #dc3545;
+            background: none;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .search-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+
+        .users-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .member-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .status-active {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-disabled {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+        }
+        .btn-group {
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="px-3 mb-4">
+            <h4><a href="/" style="text-decoration: none; color: inherit;">景点预约系统</a></h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="/admin/dashboard">
+                <i class="fas fa-home me-2"></i>控制台
+            </a>
+            <a class="nav-link" href="/admin/scenic-spots">
+                <i class="fas fa-mountain me-2"></i>景点管理
+            </a>
+            <a class="nav-link active" href="/admin/users">
+                <i class="fas fa-users me-2"></i>用户管理
+            </a>
+            <a class="nav-link" href="/admin/reservations">
+                <i class="fas fa-calendar-check me-2"></i>预约管理
+            </a>
+            <a class="nav-link" href="/admin/announcements">
+                <i class="fas fa-bullhorn me-2"></i>公告管理
+            </a>
+        </nav>
+        <form th:action="@{/admin/logout}" method="post" class="mt-auto" style="position: absolute; bottom: 0; width: 100%;">
+            <button type="submit" class="logout-btn">
+                <i class="fas fa-sign-out-alt me-2"></i>退出登录
+            </button>
+        </form>
+    </div>
+
+    <!-- 主要内容区 -->
+    <div class="main-content">
+        <div class="top-bar d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">用户管理</h4>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-clock me-2"></i>
+                <span id="currentTime"></span>
+            </div>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="searchInput" class="form-control" placeholder="搜索用户名/手机号/邮箱" th:value="${keyword}">
+            <button class="btn btn-primary" onclick="searchUsers()">
+                <i class="fas fa-search"></i> 搜索
+            </button>
+            <button class="btn btn-secondary" onclick="clearSearch()" th:if="${keyword}">
+                <i class="fas fa-times"></i> 清空
+            </button>
+        </div>
+
+        <!-- 用户列表 -->
+        <div class="users-table">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>手机号</th>
+                        <th>邮箱</th>
+                        <th>会员等级</th>
+                        <th>注册时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}"></td>
+                        <td th:text="${user.username}"></td>
+                        <td th:text="${user.phone}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td>
+                            <span class="member-badge" th:with="level=${T(com.scenic.util.MemberLevelUtil).calculateLevel(user.points)}">
+                                <span th:switch="${level}">
+                                    <span th:case="0" class="badge bg-secondary">普通会员</span>
+                                    <span th:case="1" class="badge bg-light text-dark">银卡会员</span>
+                                    <span th:case="2" class="badge bg-warning">金卡会员</span>
+                                    <span th:case="3" class="badge bg-dark">钻石会员</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td>
+                            <span class="status-badge"
+                                  th:class="${user.status == 1 ? 'status-badge status-active' : 'status-badge status-disabled'}"
+                                  th:text="${user.status == 1 ? '正常' : '禁用'}"></span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-primary" 
+                                        th:onclick="'editUser(' + ${user.id} + ')'">编辑</button>
+                                <button class="btn btn-sm btn-danger" 
+                                        th:onclick="'deleteUser(' + ${user.id} + ')'">删除</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 编辑用户模态框 -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label class="form-label">手机号</label>
+                            <input type="text" class="form-control" id="editPhone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">邮箱</label>
+                            <input type="email" class="form-control" id="editEmail">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/admin-users.js"></script>
+    <script>
+        // 更新当前时间
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html> 
